@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shipping Infrastructure Safely</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 3rem;
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .badge {
+      display: inline-block;
+      background: #1e40af;
+      color: #93c5fd;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+    }
+
+    .patterns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .pattern {
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 1rem 0.75rem;
+    }
+
+    .pattern-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pattern-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #60a5fa;
+      margin-bottom: 0.25rem;
+    }
+
+    .pattern-desc {
+      font-size: 0.7rem;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">Deployed via Terraform + GitHub Actions OIDC</span>
+
+    <h1>Shipping Infrastructure<br>Safely with Modern IaC</h1>
+
+    <p class="subtitle">
+      This static site is provisioned by Terraform and deployed through a
+      GitHub Actions pipeline using OIDC — no long-lived credentials stored anywhere.
+    </p>
+
+    <div class="patterns">
+      <div class="pattern">
+        <div class="pattern-icon">🔷</div>
+        <div class="pattern-title">Pattern 1</div>
+        <div class="pattern-desc">Plan &amp; Apply<br>with OIDC</div>
+      </div>
+      <div class="pattern">
+        <div class="pattern-icon">🔷</div>
+        <div class="pattern-title">Pattern 2</div>
+        <div class="pattern-desc">Layered Pipeline<br>Controlled Promotion</div>
+      </div>
+      <div class="pattern">
+        <div class="pattern-icon">🔷</div>
+        <div class="pattern-title">Pattern 3</div>
+        <div class="pattern-desc">Drift Detection<br>Reconciliation</div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <span class="meta-item">
+        <span class="dot"></span>
+        Managed by Terraform
+      </span>
+      <span class="meta-item">
+        <span class="dot"></span>
+        Zero Static Credentials
+      </span>
+      <span class="meta-item">
+        <span class="dot"></span>
+        Environment: <strong id="env">&nbsp;demo</strong>
+      </span>
+    </div>
+  </div>
+
+  <footer>@edm0cha &mdash; Caylent &mdash; github.com/edm0cha</footer>
+</body>
+</html>

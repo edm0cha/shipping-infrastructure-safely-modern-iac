@@ -1,0 +1,115 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Pattern 1 + Pattern 2 — Layered Pipeline with Controlled Promotion
+#
+# Triggered on merge to main when infrastructure or app content changes.
+# Promotion flow:
+#   dev apply → (success) → prod apply
+#
+# Each environment uses its own GitHub Actions environment for:
+#   - Protection rules (required reviewers, wait timers)
+#   - Scoped secrets / variables
+#
+# Authentication is via OIDC — temporary credentials, zero static keys.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Terraform Apply
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infrastructure/**"
+      - "app/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # ── Deploy to Dev ─────────────────────────────────────────────────────────
+  deploy-dev:
+    name: Deploy — dev
+    runs-on: ubuntu-latest
+    environment: dev   # maps to the "dev" GitHub Actions environment
+
+    defaults:
+      run:
+        working-directory: infrastructure/environments/dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pattern 1: OIDC — no static credentials
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+          terraform_wrapper: false   # needed so we can capture outputs cleanly
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
+
+      # Upload website content after infra is ready
+      - name: Deploy website content
+        run: |
+          BUCKET=$(terraform output -raw bucket_name)
+          echo "Deploying to s3://$BUCKET"
+          aws s3 sync ../../../app/ "s3://$BUCKET/" --delete
+
+      - name: Print website URL
+        run: terraform output website_url
+
+  # ── Deploy to Prod ────────────────────────────────────────────────────────
+  # Only runs if dev succeeds. The "prod" GitHub Actions environment can have
+  # required reviewers or a wait timer as an additional gate.
+  deploy-prod:
+    name: Deploy — prod
+    runs-on: ubuntu-latest
+    environment: prod  # maps to the "prod" GitHub Actions environment
+    needs: deploy-dev  # Pattern 2: controlled promotion — dev must pass first
+
+    defaults:
+      run:
+        working-directory: infrastructure/environments/prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
+
+      - name: Deploy website content
+        run: |
+          BUCKET=$(terraform output -raw bucket_name)
+          echo "Deploying to s3://$BUCKET"
+          aws s3 sync ../../../app/ "s3://$BUCKET/" --delete
+
+      - name: Print website URL
+        run: terraform output website_url

@@ -1,0 +1,19 @@
+# CODEOWNERS — defines who must review changes to each area of this repo.
+# GitHub will automatically request reviews from these teams/users on PRs.
+# Mirrors the slide: "Ownership, Tagging & Conventions"
+
+# App content
+/app/                                   @mochaops
+
+# Reusable modules — reviewed by platform team before any consumer is affected
+/infrastructure/modules/                @mochaops
+
+# Shared bootstrap (OIDC provider, IAM roles) — most sensitive area
+/infrastructure/shared/                 @mochaops @mochaops-security
+
+# Environment configs — each environment owned by the right team
+/infrastructure/environments/dev/       @mochaops
+/infrastructure/environments/prod/      @mochaops-sre
+
+# CI/CD pipelines — platform team owns the pipeline definitions
+/.github/                               @mochaops
