@@ -9,6 +9,11 @@
 #   2. terraform validate — bad references caught in seconds
 #   3. tfsec — security misconfigurations flagged before any resource is created
 #   4. terraform plan — full change preview posted to the PR
+#
+# All environments share the same Terraform code in infrastructure/.
+# The pipeline selects the environment by passing:
+#   -var-file=environments/<env>/terraform.tfvars
+#   -backend-config="key=<env>/website/terraform.tfstate"
 # ─────────────────────────────────────────────────────────────────────────────
 
 name: Terraform Plan
@@ -37,7 +42,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infrastructure/environments/${{ matrix.environment }}
+        working-directory: infrastructure
 
     steps:
       - name: Checkout
@@ -60,13 +65,18 @@ jobs:
       # ── Gate 1: Format ───────────────────────────────────────────────────────
       - name: Terraform Format
         id: fmt
-        run: terraform fmt -check -recursive ../../..
+        run: terraform fmt -check -recursive
         continue-on-error: true
 
-      # ── Init (needed before validate/plan) ───────────────────────────────────
+      # ── Init — backend key scoped to the environment ─────────────────────────
       - name: Terraform Init
         id: init
-        run: terraform init -input=false
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ matrix.environment }}/website/terraform.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -input=false
 
       # ── Gate 2: Validate ─────────────────────────────────────────────────────
       - name: Terraform Validate
@@ -84,7 +94,11 @@ jobs:
       # ── Gate 4: Plan ─────────────────────────────────────────────────────────
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: |
+          terraform plan \
+            -var-file="environments/${{ matrix.environment }}/terraform.tfvars" \
+            -no-color \
+            -input=false
         continue-on-error: true
 
       # ── Post plan to PR ───────────────────────────────────────────────────────
@@ -94,11 +108,11 @@ jobs:
           PLAN_OUTPUT: ${{ steps.plan.outputs.stdout }}
         with:
           script: |
-            const fmt    = '${{ steps.fmt.outcome }}';
-            const init   = '${{ steps.init.outcome }}';
+            const fmt      = '${{ steps.fmt.outcome }}';
+            const init     = '${{ steps.init.outcome }}';
             const validate = '${{ steps.validate.outcome }}';
-            const plan   = '${{ steps.plan.outcome }}';
-            const env    = '${{ matrix.environment }}';
+            const plan     = '${{ steps.plan.outcome }}';
+            const env      = '${{ matrix.environment }}';
             const planOutput = process.env.PLAN_OUTPUT;
 
             const icon = (s) => s === 'success' ? '✅' : '❌';
