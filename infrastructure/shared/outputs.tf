@@ -7,3 +7,13 @@ output "oidc_provider_arn" {
   description = "ARN of the GitHub OIDC identity provider"
   value       = aws_iam_openid_connect_provider.github.arn
 }
+
+output "scp_id" {
+  description = "ID of the deny-wildcard-actions SCP"
+  value       = aws_organizations_policy.deny_wildcard_actions.id
+}
+
+output "scp_arn" {
+  description = "ARN of the deny-wildcard-actions SCP"
+  value       = aws_organizations_policy.deny_wildcard_actions.arn
+}

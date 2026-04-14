@@ -25,7 +25,12 @@ variable "state_bucket" {
   type        = string
 }
 
-variable "state_lock_table" {
-  description = "DynamoDB table used for Terraform state locking"
+
+variable "scp_target_id" {
+  description = <<-EOT
+    OU ID (ou-xxxx-xxxxxxxx) or AWS account ID to attach the deny-wildcard SCP to.
+    Leave empty to create the SCP definition without attaching it.
+  EOT
   type        = string
+  default     = ""
 }

@@ -118,16 +118,6 @@ resource "aws_iam_policy" "github_actions" {
           "arn:aws:s3:::${var.state_bucket}",
           "arn:aws:s3:::${var.state_bucket}/*",
         ]
-      },
-      {
-        Sid    = "TerraformStateLock"
-        Effect = "Allow"
-        Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem",
-        ]
-        Resource = "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${var.state_lock_table}"
       }
     ]
   })
