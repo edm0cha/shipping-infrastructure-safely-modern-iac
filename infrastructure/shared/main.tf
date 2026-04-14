@@ -20,7 +20,7 @@ resource "aws_iam_openid_connect_provider" "github" {
   client_id_list = ["sts.amazonaws.com"]
 
   # Thumbprint for token.actions.githubusercontent.com (GitHub-managed)
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+  thumbprint_list = ["2b18947a6a9fc7764fd8b5fb18a863b0c6dac24f"]
 
   tags = {
     ManagedBy = "terraform"
@@ -33,8 +33,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "aws_iam_role" "github_actions" {
-  name        = "${var.project}-github-actions"
-  description = "Assumed by GitHub Actions via OIDC — no static credentials"
+  name = "${var.project}-github-actions"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
