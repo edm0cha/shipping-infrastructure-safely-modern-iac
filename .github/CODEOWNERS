@@ -18,7 +18,7 @@
 # ────────────────────────────────────────────────────────────────────────────
 
 # App content
-/app/                                   @superlabmx/mochaops
+/app/                                   @edm0cha
 
 # Reusable modules — changes here affect every environment that consumes them
 /infrastructure/modules/                @superlabmx/mochaops

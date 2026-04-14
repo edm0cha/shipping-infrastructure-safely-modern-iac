@@ -1,0 +1,34 @@
+# Terraform local state — never commit state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform plan output files
+*.tfplan
+
+# Terraform working directories
+**/.terraform/
+**/.terraform.lock.hcl
+
+# Terraform variable files that may contain secrets
+# (terraform.tfvars are committed in this repo since they hold non-secret config)
+*.auto.tfvars
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files (local developer overrides — not for version control)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
