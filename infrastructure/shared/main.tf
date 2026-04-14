@@ -101,6 +101,7 @@ resource "aws_iam_policy" "github_actions" {
           "s3:PutObject",
           "s3:GetObject",
           "s3:DeleteObject",
+          "s3:GetBucketCors"
         ]
         Resource = "*"
       },
