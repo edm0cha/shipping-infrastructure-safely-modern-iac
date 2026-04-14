@@ -13,11 +13,10 @@ terraform {
   #   terraform init
   #   terraform apply
   backend "s3" {
-    bucket         = "REPLACE_WITH_YOUR_STATE_BUCKET"
+    bucket         = "demo-shipping-infrastructure-safely-modern-iac"
     key            = "shared/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    use_lockfile   = true
   }
 }
 
