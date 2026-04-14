@@ -1,0 +1,34 @@
+# CODEOWNERS — GitHub automatically requests reviews from the listed owners
+# whenever a PR touches files under each path.
+#
+# Mirrors the slide: "Ownership, Tagging & Conventions"
+#
+# ── Format rules ────────────────────────────────────────────────────────────
+# Individual user : @username
+# GitHub team     : @org/team-name   (team must exist in the org)
+#
+# For this demo repo the owners are individual GitHub users.
+# In a real org replace them with @your-org/platform-team etc.
+#
+# ── Branch protection requirement ───────────────────────────────────────────
+# CODEOWNERS only triggers automatic review requests when the branch has
+# "Require review from Code Owners" enabled:
+#   Settings → Branches → Branch protection rules → edit rule →
+#   ✅ Require review from Code Owners
+# ────────────────────────────────────────────────────────────────────────────
+
+# App content
+/app/                                   @superlabmx/mochaops
+
+# Reusable modules — changes here affect every environment that consumes them
+/infrastructure/modules/                @superlabmx/mochaops
+
+# Shared bootstrap (OIDC provider, IAM roles) — most sensitive, two reviewers
+/infrastructure/shared/                 @superlabmx/mochaops-sre
+
+# Environment configs
+/infrastructure/environments/dev/       @superlabmx/mochaops-security
+/infrastructure/environments/prod/      @superlabmx/mochaops-security
+
+# CI/CD pipeline definitions
+/.github/workflows/                     @superlabmx/mochaops-sre
