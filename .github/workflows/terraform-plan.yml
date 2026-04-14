@@ -34,6 +34,11 @@ jobs:
   plan:
     name: Plan — ${{ matrix.environment }}
     runs-on: ubuntu-latest
+    # Scopes vars (AWS_ROLE_ARN, AWS_REGION, TF_STATE_BUCKET) to the matching
+    # GitHub Actions environment so each matrix leg uses its own credentials.
+    # Note: if the environment has required reviewers, plan jobs will also be
+    # gated — remove protection rules from plan environments if that's unwanted.
+    environment: ${{ matrix.environment }}
 
     strategy:
       fail-fast: false
