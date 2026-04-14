@@ -18,3 +18,9 @@ variable "bucket_name" {
   description = "Globally unique S3 bucket name for the static website"
   type        = string
 }
+
+variable "instance_type" {
+  description = "EC2 instance type for the demo instance"
+  type        = string
+  default     = "t3.micro"
+}
