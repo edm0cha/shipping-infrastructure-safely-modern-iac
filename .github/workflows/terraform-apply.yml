@@ -26,6 +26,16 @@ on:
     paths:
       - "infrastructure/**"
       - "app/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+          - all
 
 permissions:
   id-token: write
@@ -37,6 +47,7 @@ jobs:
     name: Deploy — dev
     runs-on: ubuntu-latest
     environment: dev   # maps to the "dev" GitHub Actions environment
+    if: github.event_name == 'push' || inputs.environment == 'dev' || inputs.environment == 'all'
 
     defaults:
       run:
@@ -92,6 +103,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod  # maps to the "prod" GitHub Actions environment
     needs: deploy-dev  # Pattern 2: controlled promotion — dev must pass first
+    # always() lets this job evaluate even when deploy-dev was skipped.
+    # Skipped happens on a manual trigger with environment=prod — intentional bypass.
+    # On push to main, deploy-dev must have succeeded (never skipped).
+    if: always() && (needs.deploy-dev.result == 'success' || needs.deploy-dev.result == 'skipped') && (github.event_name == 'push' || inputs.environment == 'prod' || inputs.environment == 'all')
 
     defaults:
       run:

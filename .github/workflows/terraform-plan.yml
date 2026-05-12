@@ -23,6 +23,15 @@ on:
     paths:
       - "infrastructure/**"
       - "app/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to plan"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
 
 # Permissions required for OIDC token issuance and PR comment posting
 permissions:
@@ -43,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, prod]
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', inputs.environment)) || fromJson('["dev","prod"]') }}
 
     defaults:
       run:
