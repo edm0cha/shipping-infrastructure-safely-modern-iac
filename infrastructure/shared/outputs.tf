@@ -8,12 +8,12 @@ output "oidc_provider_arn" {
   value       = data.aws_iam_openid_connect_provider.github.arn
 }
 
-output "scp_id" {
-  description = "ID of the deny-non-t3-micro SCP"
-  value       = aws_organizations_policy.deny_non_t3_micro.id
-}
+# output "scp_id" {
+#   description = "ID of the deny-non-t3-micro SCP"
+#   value       = aws_organizations_policy.deny_non_t3_micro.id
+# }
 
-output "scp_arn" {
-  description = "ARN of the deny-non-t3-micro SCP"
-  value       = aws_organizations_policy.deny_non_t3_micro.arn
-}
+# output "scp_arn" {
+#   description = "ARN of the deny-non-t3-micro SCP"
+#   value       = aws_organizations_policy.deny_non_t3_micro.arn
+# }
