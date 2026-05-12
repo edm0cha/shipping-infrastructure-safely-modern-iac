@@ -24,3 +24,9 @@ variable "instance_type" {
   type        = string
   default     = "t3.micro"
 }
+
+variable "bucket_force_destroy" {
+  description = "Force to Destroy S3 Bucket"
+  type        = bool
+  default     = false
+}
