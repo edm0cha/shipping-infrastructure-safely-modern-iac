@@ -119,9 +119,10 @@ resource "aws_iam_policy" "github_actions" {
         Sid    = "IAMResources"
         Effect = "Allow"
         Action = [
-          "iam:ListOpenIDConnectProviders"
+          "iam:ListOpenIDConnectProviders",
+          "iam:GetOpenIDConnectProvider"
         ]
-        Resource = "*"
+        Resource = "arn:aws:iam::*:oidc-provider/token.actions.githubusercontent.com"
       },
       {
         Sid    = "EC2DemoInstance"
