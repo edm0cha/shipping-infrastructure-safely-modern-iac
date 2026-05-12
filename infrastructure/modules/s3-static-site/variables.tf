@@ -8,3 +8,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "force_destroy" {
+  description = "Force to Destroy S3 Bucket"
+  type        = bool
+  default     = false
+}
