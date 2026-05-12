@@ -35,7 +35,7 @@ on:
 
 # Permissions required for OIDC token issuance and PR comment posting
 permissions:
-  id-token: write   # lets GitHub issue an OIDC token
+  id-token: write # lets GitHub issue an OIDC token
   contents: read
   pull-requests: write
 
@@ -60,7 +60,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # ── Pattern 1: OIDC Authentication ──────────────────────────────────────
       # GitHub exchanges its OIDC token for temporary AWS credentials.
@@ -103,7 +103,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
           working_directory: infrastructure/
-          soft_fail: true   # set to false to block PRs on HIGH/CRITICAL findings
+          soft_fail: true # set to false to block PRs on HIGH/CRITICAL findings
 
       # ── Gate 4: Plan ─────────────────────────────────────────────────────────
       - name: Terraform Plan

@@ -46,7 +46,7 @@ jobs:
   deploy-dev:
     name: Deploy — dev
     runs-on: ubuntu-latest
-    environment: dev   # maps to the "dev" GitHub Actions environment
+    environment: dev # maps to the "dev" GitHub Actions environment
     if: github.event_name == 'push' || inputs.environment == 'dev' || inputs.environment == 'all'
 
     defaults:
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Pattern 1: OIDC — no static credentials
       - name: Configure AWS credentials (OIDC)
@@ -68,7 +68,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~1.9"
-          terraform_wrapper: false   # needed so we can capture outputs cleanly
+          terraform_wrapper: false # needed so we can capture outputs cleanly
 
       - name: Terraform Init
         run: |
@@ -101,8 +101,8 @@ jobs:
   deploy-prod:
     name: Deploy — prod
     runs-on: ubuntu-latest
-    environment: prod  # maps to the "prod" GitHub Actions environment
-    needs: deploy-dev  # Pattern 2: controlled promotion — dev must pass first
+    environment: prod # maps to the "prod" GitHub Actions environment
+    needs: deploy-dev # Pattern 2: controlled promotion — dev must pass first
     # always() lets this job evaluate even when deploy-dev was skipped.
     # Skipped happens on a manual trigger with environment=prod — intentional bypass.
     # On push to main, deploy-dev must have succeeded (never skipped).
