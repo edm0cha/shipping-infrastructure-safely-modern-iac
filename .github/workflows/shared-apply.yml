@@ -27,7 +27,7 @@ jobs:
   apply-shared:
     name: Apply — shared
     runs-on: ubuntu-latest
-    environment: shared   # add a required reviewer here in GitHub settings
+    environment: shared # add a required reviewer here in GitHub settings
 
     defaults:
       run:
@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

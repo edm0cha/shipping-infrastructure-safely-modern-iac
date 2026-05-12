@@ -127,12 +127,46 @@ resource "aws_iam_policy" "github_actions" {
         ]
       },
       {
-        Sid    = "IAMResources"
+        # Read-only IAM actions — scoped to * because Describe/List don't
+        # support resource-level restrictions in IAM.
+        Sid    = "IAMReadOnly"
         Effect = "Allow"
         Action = [
-          "iam:GetRole"
+          "iam:GetRole",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListPolicyVersions",
         ]
         Resource = "*"
+      },
+      {
+        # Write IAM actions — scoped to resources with the project prefix so
+        # this role can only manage its own role and policy, not arbitrary IAM.
+        Sid    = "IAMWrite"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project}-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project}-*",
+        ]
       },
       {
         Sid    = "EC2DemoInstance"
