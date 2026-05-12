@@ -102,7 +102,11 @@ resource "aws_iam_policy" "github_actions" {
           "s3:GetObject",
           "s3:DeleteObject",
           "s3:GetBucketCors",
-          "s3:GetBucketRequestPayment"
+          "s3:GetAccelerateConfiguration",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:GetReplicationConfiguration",
+          "s3:GetBucketObjectLockConfiguration"
         ]
         Resource = "*"
       },
