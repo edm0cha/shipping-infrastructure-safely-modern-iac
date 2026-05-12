@@ -21,14 +21,14 @@
 /app/                                   @edm0cha
 
 # Reusable modules — changes here affect every environment that consumes them
-/infrastructure/modules/                @superlabmx/mochaops
+/infrastructure/modules/                @edm0cha
 
 # Shared bootstrap (OIDC provider, IAM roles) — most sensitive, two reviewers
-/infrastructure/shared/                 @superlabmx/mochaops-sre
+/infrastructure/shared/                 @edm0cha
 
 # Environment configs
-/infrastructure/environments/dev/       @superlabmx/mochaops-security
-/infrastructure/environments/prod/      @superlabmx/mochaops-security
+/infrastructure/environments/dev/       @edm0cha
+/infrastructure/environments/prod/      @edm0cha
 
 # CI/CD pipeline definitions
-/.github/workflows/                     @superlabmx/mochaops-sre
+/.github/workflows/                     @edm0cha

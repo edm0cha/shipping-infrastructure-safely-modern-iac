@@ -9,14 +9,11 @@ terraform {
   }
 
   # Bootstrap note: this backend must be created manually before first apply.
-  # Replace the placeholder values below, then run:
-  #   terraform init
-  #   terraform apply
   backend "s3" {
-    bucket         = "demo-shipping-infrastructure-safely-modern-iac"
-    key            = "shared/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
+    bucket  = "demo-shipping-infrastructure-safely-modern-iac"
+    key     = "shared/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
   }
 }
 
