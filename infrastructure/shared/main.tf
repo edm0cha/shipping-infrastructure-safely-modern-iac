@@ -116,6 +116,14 @@ resource "aws_iam_policy" "github_actions" {
         ]
       },
       {
+        Sid    = "IAMResources"
+        Effect = "Allow"
+        Action = [
+          "iam:ListOpenIDConnectProviders"
+        ]
+        Resource = "*"
+      },
+      {
         Sid    = "EC2DemoInstance"
         Effect = "Allow"
         Action = [
