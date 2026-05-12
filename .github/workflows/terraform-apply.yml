@@ -25,6 +25,7 @@ on:
       - main
     paths:
       - "infrastructure/**"
+      - "!infrastructure/shared/**"   # handled by shared-apply.yml
       - "app/**"
 
 permissions:

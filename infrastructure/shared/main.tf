@@ -12,20 +12,9 @@
 
 data "aws_caller_identity" "current" {}
 
-# GitHub's OIDC provider for token.actions.githubusercontent.com
-resource "aws_iam_openid_connect_provider" "github" {
+# GitHub's OIDC provider — managed externally, looked up by URL
+data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
-
-  # GitHub's OIDC audience value
-  client_id_list = ["sts.amazonaws.com"]
-
-  # Thumbprint for token.actions.githubusercontent.com (GitHub-managed)
-  thumbprint_list = ["2b18947a6a9fc7764fd8b5fb18a863b0c6dac24f"]
-
-  tags = {
-    ManagedBy = "terraform"
-    Project   = var.project
-  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +31,7 @@ resource "aws_iam_role" "github_actions" {
         Sid    = "GitHubActionsOIDC"
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
+          Federated = data.aws_iam_openid_connect_provider.github.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {

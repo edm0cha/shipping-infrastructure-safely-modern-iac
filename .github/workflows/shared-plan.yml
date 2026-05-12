@@ -1,62 +1,45 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Pattern 1 — Plan / Review / Apply
-# Runs on every PR that touches infrastructure or app content.
-# Posts the plan output as a PR comment so reviewers can see exactly what
-# will change before approving.
+# Shared Infrastructure — Plan
 #
-# Pattern 2 (gates applied here):
-#   1. terraform fmt  — style violations caught in seconds
-#   2. terraform validate — bad references caught in seconds
-#   3. tfsec — security misconfigurations flagged before any resource is created
-#   4. terraform plan — full change preview posted to the PR
+# Runs on every PR that touches infrastructure/shared/.
+# These are bootstrap resources (OIDC provider, GitHub Actions IAM role, SCP)
+# shared across all environments — they live outside the dev/prod matrix.
 #
-# All environments share the same Terraform code in infrastructure/.
-# The pipeline selects the environment by passing:
-#   -var-file=environments/<env>/terraform.tfvars
-#   -backend-config="key=<env>/website/terraform.tfstate"
+# Requires a "shared" GitHub Actions environment with:
+#   AWS_ROLE_ARN    — a management role with IAM + Organizations permissions
+#   AWS_REGION      — target region
+#   TF_STATE_BUCKET — S3 bucket for Terraform state
+#
+# Note: the management role here needs broader permissions than the
+# per-environment GitHub Actions role (IAM write, Organizations, etc.).
 # ─────────────────────────────────────────────────────────────────────────────
 
-name: Terraform Plan
+name: Shared Infra Plan
 
 on:
   pull_request:
     paths:
-      - "infrastructure/**"
-      - "!infrastructure/shared/**"   # handled by shared-plan.yml
-      - "app/**"
+      - "infrastructure/shared/**"
 
-# Permissions required for OIDC token issuance and PR comment posting
 permissions:
-  id-token: write   # lets GitHub issue an OIDC token
+  id-token: write
   contents: read
   pull-requests: write
 
 jobs:
   plan:
-    name: Plan — ${{ matrix.environment }}
+    name: Plan — shared
     runs-on: ubuntu-latest
-    # Scopes vars (AWS_ROLE_ARN, AWS_REGION, TF_STATE_BUCKET) to the matching
-    # GitHub Actions environment so each matrix leg uses its own credentials.
-    # Note: if the environment has required reviewers, plan jobs will also be
-    # gated — remove protection rules from plan environments if that's unwanted.
-    environment: ${{ matrix.environment }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: [dev, prod]
+    environment: shared
 
     defaults:
       run:
-        working-directory: infrastructure
+        working-directory: infrastructure/shared
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ── Pattern 1: OIDC Authentication ──────────────────────────────────────
-      # GitHub exchanges its OIDC token for temporary AWS credentials.
-      # No AWS_ACCESS_KEY_ID or AWS_SECRET_ACCESS_KEY stored anywhere.
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -74,13 +57,13 @@ jobs:
         run: terraform fmt -check -recursive
         continue-on-error: true
 
-      # ── Init — backend key scoped to the environment ─────────────────────────
+      # ── Init — shared state is stored under a dedicated key ──────────────────
       - name: Terraform Init
         id: init
         run: |
           terraform init \
             -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ matrix.environment }}/website/terraform.tfstate" \
+            -backend-config="key=shared/terraform.tfstate" \
             -backend-config="region=${{ vars.AWS_REGION }}" \
             -input=false
 
@@ -90,19 +73,17 @@ jobs:
         run: terraform validate -no-color
 
       # ── Gate 3: Security Scan ────────────────────────────────────────────────
-      # tfsec flags security misconfigurations before a single resource is created.
       - name: Run tfsec
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
-          working_directory: infrastructure/
-          soft_fail: true   # set to false to block PRs on HIGH/CRITICAL findings
+          working_directory: infrastructure/shared/
+          soft_fail: true
 
       # ── Gate 4: Plan ─────────────────────────────────────────────────────────
       - name: Terraform Plan
         id: plan
         run: |
           terraform plan \
-            -var-file="environments/${{ matrix.environment }}/terraform.tfvars" \
             -no-color \
             -input=false
         continue-on-error: true
@@ -118,12 +99,13 @@ jobs:
             const init     = '${{ steps.init.outcome }}';
             const validate = '${{ steps.validate.outcome }}';
             const plan     = '${{ steps.plan.outcome }}';
-            const env      = '${{ matrix.environment }}';
             const planOutput = process.env.PLAN_OUTPUT;
 
             const icon = (s) => s === 'success' ? '✅' : '❌';
 
-            const body = `### Terraform Plan — \`${env}\`
+            const body = `### Terraform Plan — \`shared\`
+
+            > ⚠️ These are bootstrap resources shared across all environments (OIDC provider, IAM role, SCP). Review carefully.
 
             | Gate | Status |
             |---|---|
