@@ -24,10 +24,19 @@ on:
       - "infrastructure/**"
       - "!infrastructure/shared/**"   # handled by shared-plan.yml
       - "app/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to plan"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
 
 # Permissions required for OIDC token issuance and PR comment posting
 permissions:
-  id-token: write   # lets GitHub issue an OIDC token
+  id-token: write # lets GitHub issue an OIDC token
   contents: read
   pull-requests: write
 
@@ -44,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, prod]
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', inputs.environment)) || fromJson('["dev","prod"]') }}
 
     defaults:
       run:
@@ -52,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # ── Pattern 1: OIDC Authentication ──────────────────────────────────────
       # GitHub exchanges its OIDC token for temporary AWS credentials.
@@ -95,7 +104,7 @@ jobs:
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
           working_directory: infrastructure/
-          soft_fail: true   # set to false to block PRs on HIGH/CRITICAL findings
+          soft_fail: true # set to false to block PRs on HIGH/CRITICAL findings
 
       # ── Gate 4: Plan ─────────────────────────────────────────────────────────
       - name: Terraform Plan
