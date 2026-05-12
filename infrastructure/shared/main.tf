@@ -12,20 +12,9 @@
 
 data "aws_caller_identity" "current" {}
 
-# GitHub's OIDC provider for token.actions.githubusercontent.com
-resource "aws_iam_openid_connect_provider" "github" {
+# GitHub's OIDC provider — managed externally, looked up by URL
+data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
-
-  # GitHub's OIDC audience value
-  client_id_list = ["sts.amazonaws.com"]
-
-  # Thumbprint for token.actions.githubusercontent.com (GitHub-managed)
-  thumbprint_list = ["2b18947a6a9fc7764fd8b5fb18a863b0c6dac24f"]
-
-  tags = {
-    ManagedBy = "terraform"
-    Project   = var.project
-  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +31,7 @@ resource "aws_iam_role" "github_actions" {
         Sid    = "GitHubActionsOIDC"
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
+          Federated = data.aws_iam_openid_connect_provider.github.arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -102,6 +91,11 @@ resource "aws_iam_policy" "github_actions" {
           "s3:GetObject",
           "s3:DeleteObject",
           "s3:GetBucketCors",
+          "s3:GetAccelerateConfiguration",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:GetReplicationConfiguration",
+          "s3:GetBucketObjectLockConfiguration",
           "s3:GetBucketRequestPayment",
           "s3:ListBucketVersions"
         ]
@@ -119,6 +113,59 @@ resource "aws_iam_policy" "github_actions" {
         Resource = [
           "arn:aws:s3:::${var.state_bucket}",
           "arn:aws:s3:::${var.state_bucket}/*",
+        ]
+      },
+      {
+        Sid    = "IAMOpenIDResources"
+        Effect = "Allow"
+        Action = [
+          "iam:ListOpenIDConnectProviders",
+          "iam:GetOpenIDConnectProvider"
+        ]
+        Resource = [
+          "arn:aws:iam::*:oidc-provider/*"
+        ]
+      },
+      {
+        # Read-only IAM actions — scoped to * because Describe/List don't
+        # support resource-level restrictions in IAM.
+        Sid    = "IAMReadOnly"
+        Effect = "Allow"
+        Action = [
+          "iam:GetRole",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListPolicyVersions",
+        ]
+        Resource = "*"
+      },
+      {
+        # Write IAM actions — scoped to resources with the project prefix so
+        # this role can only manage its own role and policy, not arbitrary IAM.
+        Sid    = "IAMWrite"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:UpdateRole",
+          "iam:DeleteRole",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project}-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project}-*",
         ]
       },
       {

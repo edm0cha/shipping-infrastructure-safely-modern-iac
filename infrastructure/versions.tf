@@ -20,7 +20,8 @@ provider "aws" {
   default_tags {
     tags = {
       ManagedBy   = "terraform"
-      Project     = "shipping-iac-demo"
+      Owner       = "edm0cha"
+      Repository  = "shipping-infrastructure-safely-modern-iac"
       Environment = var.environment
     }
   }
